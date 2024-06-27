@@ -68,7 +68,9 @@ export default function Onboarding({ navigation }) {
       <View style={styles.buttonContainer}>
         <Pressable
           disabled={!isFirstNameValid || !isEmailValid}
-          //onPress={() => {navigation.navigate('Home')}}
+          onPress={() => {
+            navigation.navigate("Profile");
+          }}
           //  Alert.alert("Thanks for subscribing, stay tuned!");
           //}}
         >
