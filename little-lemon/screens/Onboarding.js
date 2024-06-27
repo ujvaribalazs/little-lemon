@@ -7,13 +7,13 @@ import {
   Image,
   Button,
   Pressable,
-  //KeyboardAvoidingView,
-  //Platform,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import logo from "../assets/LLlogo.png";
 import { useState } from "react";
 
-export default function Onboarding() {
+export default function Onboarding({ navigation }) {
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [isFirstNameValid, setIsFirstNameValid] = useState(false);
@@ -33,14 +33,19 @@ export default function Onboarding() {
   };
   return (
     <View style={styles.container}>
-      //behavior={Platform.OS === "ios" ? "padding" : "height"}
       <View style={styles.headerContainer}>
         <Text style={styles.headerText}>Little Lemon</Text>
         <Image source={logo} style={styles.logo} />
       </View>
-      <View style={styles.formContainer}>
+      <KeyboardAvoidingView
+        style={styles.formContainer}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <Text style={styles.welcomeTitle}>Let us get to know You</Text>
+      </KeyboardAvoidingView>
+      <View style={{ backgroundColor: "#CBD2D9" }}>
         <Text style={styles.title}>First Name</Text>
+
         <TextInput
           style={styles.email}
           placeholder="Your first name "
@@ -63,22 +68,19 @@ export default function Onboarding() {
       <View style={styles.buttonContainer}>
         <Pressable
           disabled={!isFirstNameValid || !isEmailValid}
-          //onPress={() => {
+          //onPress={() => {navigation.navigate('Home')}}
           //  Alert.alert("Thanks for subscribing, stay tuned!");
           //}}
         >
-          <Text style={[styles.buttonText, !email && styles.disableButtonText]}>
-            NEXT
+          <Text
+            style={[
+              styles.buttonText,
+              !isEmailValid && styles.disableButtonText,
+            ]}
+          >
+            Next
           </Text>
         </Pressable>
-        {/* <Button
-       //   style={styles.buttonText}
-          title="Next"
-          onPress={() => {
-            
-          }}
-          //disabled={!isFirstNameValid || !isEmailValid}
-        /> */}
       </View>
     </View>
   );
@@ -96,13 +98,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 20,
-    flex: 0.1,
+
     paddingHorizontal: 80,
     backgroundColor: "#DEE3E9",
   },
   formContainer: {
     backgroundColor: "#CBD2D9",
-    flex: 0.6,
+    flex: 1,
   },
   headerText: {
     color: "#495E57", //#485D56
@@ -127,21 +129,19 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: "center",
-    fontWeight: "bold",
+    fontWeight: "medium",
     fontSize: 36,
     color: "#344854",
   },
   email: {
     padding: 10,
     margin: 20,
-    //width: "85%",
+
     borderWidth: 2,
     borderRadius: 5,
     borderColor: "#344854",
   },
-  buttonContainer: {
-    flex: 0.3,
-  },
+  buttonContainer: {},
   buttonText: {
     color: "#344854",
     padding: 12,
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   disableButtonText: {
-    //backgroundColor: "green",
     padding: 12,
+    color: "white",
   },
 });
