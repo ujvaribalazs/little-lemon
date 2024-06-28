@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TextInput,
   Image,
+  Button,
   Pressable,
   KeyboardAvoidingView,
   Platform,
@@ -25,7 +26,6 @@ export default function Onboarding({ route, navigation }) {
     setIsFirstNameValid(isValid);
     setFirstName(text);
   };
-
   const validateEmail = (text) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isValid = emailRegex.test(text);
@@ -47,6 +47,7 @@ export default function Onboarding({ route, navigation }) {
       storeLoginInfo(true);
     }
   }, [isLoggedIn]); // Effect runs when isLoggedIn changes.
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -61,7 +62,6 @@ export default function Onboarding({ route, navigation }) {
       </KeyboardAvoidingView>
       <View style={{ backgroundColor: "#CBD2D9" }}>
         <Text style={styles.title}>First Name</Text>
-
         <TextInput
           style={styles.email}
           placeholder="Your first name "
@@ -103,7 +103,6 @@ export default function Onboarding({ route, navigation }) {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1, // Use all available space
@@ -116,7 +115,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 20,
-
     paddingHorizontal: 80,
     backgroundColor: "#DEE3E9",
   },
@@ -129,7 +127,6 @@ const styles = StyleSheet.create({
     fontSize: 30,
     padding: 20,
     fontFamily: "Karla-Regular",
-
     //fontFamily: "Karla-Regular",
   },
   logo: {
@@ -163,7 +160,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#344854",
     padding: 12,
-
     textAlign: "center",
     marginLeft: 200,
     marginRight: 50,
@@ -172,6 +168,7 @@ const styles = StyleSheet.create({
 
     borderColor: "#CBD2D9",
     backgroundColor: "#CBD2D9",
+    borderRadius: 5,
     borderRadius: 10,
   },
   disableButtonText: {
