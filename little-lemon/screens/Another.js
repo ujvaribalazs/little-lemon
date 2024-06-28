@@ -1,10 +1,10 @@
 import React from "react";
 import { View, Text, Button } from "react-native";
 
-function Home({ navigation }) {
+function Another({ navigation }) {
   return (
     <View>
-      <Text>Home Screen</Text>
+      <Text>Another Screen</Text>
       <Button
         title="Go to Profile"
         onPress={() => navigation.navigate("Profile")}
@@ -13,4 +13,4 @@ function Home({ navigation }) {
   );
 }
 
-export default Home;
+export default Another;
