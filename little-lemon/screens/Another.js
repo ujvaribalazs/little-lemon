@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Button } from "react-native";
 
 function Another({ navigation }) {
+  const { loginState, setLoginState } = useAuth();
   return (
     <View>
       <Text>Another Screen</Text>

@@ -6,26 +6,26 @@ import {
   StyleSheet,
   TextInput,
   Image,
-  Button,
   Pressable,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { useAuth } from "../components/AuthContext";
 import logo from "../assets/LLlogo.png";
 
-export default function Onboarding({ route, navigation }) {
-  const { onDone } = route.params;
+export default function Onboarding({ navigation }) {
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [isFirstNameValid, setIsFirstNameValid] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { loginState, setLoginState } = useAuth();
 
   const validateFirstName = (text) => {
     const isValid = text.length > 0 && /^[a-zA-Z ]+$/.test(text);
     setIsFirstNameValid(isValid);
     setFirstName(text);
   };
+
   const validateEmail = (text) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isValid = emailRegex.test(text);
@@ -36,17 +36,18 @@ export default function Onboarding({ route, navigation }) {
   const storeLoginInfo = async (info) => {
     try {
       await AsyncStorage.setItem("@login", info.toString());
-      onDone(); // Hívja meg a callbacket az adatmentés után
+      setLoginState(true);
+      console.log("state from onboarding", loginState);
     } catch (e) {
       console.error(e);
     }
   };
 
   useEffect(() => {
-    if (isLoggedIn) {
+    if (loginState) {
       storeLoginInfo(true);
     }
-  }, [isLoggedIn]); // Effect runs when isLoggedIn changes.
+  }, [loginState]);
 
   return (
     <View style={styles.container}>
@@ -63,29 +64,29 @@ export default function Onboarding({ route, navigation }) {
       <View style={{ backgroundColor: "#CBD2D9" }}>
         <Text style={styles.title}>First Name</Text>
         <TextInput
-          style={styles.email}
-          placeholder="Your first name "
+          style={styles.input}
+          placeholder="Your first name"
           value={firstName}
           onChangeText={validateFirstName}
-          maxlength={250}
+          maxLength={250}
         />
         <Text style={styles.title}>Email</Text>
         <TextInput
-          style={styles.email}
+          style={styles.input}
           placeholder="hello@email.com"
           value={email}
           onChangeText={validateEmail}
           keyboardType="email-address"
           clearButtonMode="always"
-          multiline={true}
-          maxlength={250}
+          multiline={false}
+          maxLength={250}
         />
       </View>
       <View style={styles.buttonContainer}>
         <Pressable
           disabled={!isFirstNameValid || !isEmailValid}
           onPress={() => {
-            setIsLoggedIn(true);
+            setLoginState(true);
             storeLoginInfo(true);
             navigation.navigate("Profile");
           }}
@@ -93,7 +94,7 @@ export default function Onboarding({ route, navigation }) {
           <Text
             style={[
               styles.buttonText,
-              !isEmailValid && styles.disableButtonText,
+              (!isFirstNameValid || !isEmailValid) && styles.disableButtonText,
             ]}
           >
             Next
@@ -103,11 +104,11 @@ export default function Onboarding({ route, navigation }) {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // Use all available space
-    paddingHorizontal: 0, // Ensure no horizontal padding
-    //backgroundColor: "pink",
+    flex: 1,
+    paddingHorizontal: 0,
     width: "100%",
   },
   headerContainer: {
@@ -123,11 +124,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerText: {
-    color: "#495E57", //#485D56
+    color: "#495E57",
     fontSize: 30,
     padding: 20,
     fontFamily: "Karla-Regular",
-    //fontFamily: "Karla-Regular",
   },
   logo: {
     width: 50,
@@ -148,31 +148,27 @@ const styles = StyleSheet.create({
     fontSize: 36,
     color: "#344854",
   },
-  email: {
+  input: {
     padding: 10,
     margin: 20,
-
     borderWidth: 2,
     borderRadius: 10,
     borderColor: "#344854",
   },
-  buttonContainer: {},
+  buttonContainer: {
+    alignItems: "center",
+    marginTop: 20,
+  },
   buttonText: {
     color: "#344854",
     padding: 12,
     textAlign: "center",
-    marginLeft: 200,
-    marginRight: 50,
-    marginTop: 60,
-    marginBottom: 40,
-
     borderColor: "#CBD2D9",
     backgroundColor: "#CBD2D9",
-    borderRadius: 5,
     borderRadius: 10,
+    width: 200,
   },
   disableButtonText: {
-    padding: 12,
-    color: "white",
+    color: "gray",
   },
 });

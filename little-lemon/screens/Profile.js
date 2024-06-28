@@ -1,37 +1,39 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as React from "react";
+import { useEffect } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
+import { useAuth } from "../components/AuthContext";
 
-export default function Profile({ route, navigation }) {
-  const { onDone } = route.params;
+export default function Profile({ navigation }) {
+  const { loginState, setLoginState } = useAuth();
+
   const logOut = async () => {
     try {
       await AsyncStorage.removeItem("@login");
-      onDone(); // Hívja meg a callbacket az adatmentés után
+      setLoginState(false);
     } catch (e) {
       console.error(e);
     }
   };
+
+  useEffect(() => {
+    if (!loginState) {
+      navigation.navigate("Onboarding");
+    }
+  }, [loginState]);
+
   return (
     <View>
       <View style={styles.container}>
         <Text style={styles.text}>Profile Screen</Text>
       </View>
       <View style={styles.buttonContainer}>
-        <Pressable
-          onPress={() => {
-            navigation.navigate("Onboarding");
-          }}
-        >
-          <Text style={styles.buttonText}>Back to Onboaarding</Text>
+        <Pressable onPress={() => navigation.navigate("Onboarding")}>
+          <Text style={styles.buttonText}>Back to Onboarding</Text>
         </Pressable>
       </View>
       <View style={styles.buttonContainer}>
-        <Pressable
-          onPress={() => {
-            logOut();
-          }}
-        >
+        <Pressable onPress={logOut}>
           <Text style={styles.buttonText}>Log out...</Text>
         </Pressable>
       </View>
@@ -52,9 +54,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#344854",
     padding: 12,
-
     textAlign: "center",
-
     marginTop: 60,
     marginBottom: 40,
     marginHorizontal: 30,

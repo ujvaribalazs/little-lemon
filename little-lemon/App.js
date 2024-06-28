@@ -10,7 +10,8 @@ import Onboarding from "./screens/Onboarding";
 import Profile from "./screens/Profile";
 import Another from "./screens/Another";
 import Home from "./screens/Home";
-SplashScreen.preventAutoHideAsync();
+import { AuthProvider } from "./components/AuthContext";
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -18,20 +19,24 @@ export default function App() {
     "Karla-Regular": require("./assets/fonts/Karla-Regular.ttf"),
   });
 
+  useEffect(() => {
+    async function prepare() {
+      await SplashScreen.preventAutoHideAsync();
+    }
+    prepare();
+  }, []);
+
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded || fontError) {
       await SplashScreen.hideAsync();
     }
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) {
-    return null;
-  }
-  const [loginState, setLoginState] = useState(false);
+  const [loginState, setLoginState] = useState(null);
 
   const loadingScreen = () => {
     return (
-      <View>
+      <View style={styles.container}>
         <Text>Loading...</Text>
       </View>
     );
@@ -42,7 +47,7 @@ export default function App() {
       const state = await AsyncStorage.getItem("@login");
       if (state !== null) {
         setLoginState(true);
-        console.log(state);
+        console.log("state from readLoginState", state);
       } else {
         setLoginState(false);
       }
@@ -51,56 +56,48 @@ export default function App() {
       setLoginState(false);
     }
   };
+
   useEffect(() => {
     readLoginState();
   }, []);
-  if (loginState === null) {
-    return loadingScreen; // ide lehetne a betöltés alatti kezdőképernyő
+
+  if (!fontsLoaded && !fontError) {
+    return null;
   }
+
+  if (fontError) {
+    return (
+      <View style={styles.container}>
+        <Text>Error loading fonts</Text>
+      </View>
+    );
+  }
+
+  if (loginState === null) {
+    return loadingScreen();
+  }
+
   return (
     <View style={styles.container} onLayout={onLayoutRootView}>
       <StatusBar style="auto" />
-      <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home">
-          {loginState ? (
-            <>
-              <Stack.Screen
-                name="Profile"
-                component={Profile}
-                initialParams={{ onDone: readLoginState }}
-              />
-              <Stack.Screen
-                name="Home"
-                component={Home}
-                initialParams={{ onDone: readLoginState }}
-              />
-              <Stack.Screen
-                name="Another"
-                component={Another}
-                initialParams={{ onDone: readLoginState }}
-              />
-            </>
-          ) : (
-            <>
-              <Stack.Screen
-                name="Onboarding"
-                component={Onboarding}
-                initialParams={{ onDone: readLoginState }}
-              />
-              <Stack.Screen
-                name="Profile"
-                component={Profile}
-                initialParams={{ onDone: readLoginState }}
-              />
-              <Stack.Screen
-                name="Home"
-                component={Home}
-                initialParams={{ onDone: readLoginState }}
-              />
-            </>
-          )}
-        </Stack.Navigator>
-      </NavigationContainer>
+      <AuthProvider>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName="Home">
+            <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen name="Profile" component={Profile} />
+
+            {loginState ? (
+              <>
+                <Stack.Screen name="Another" component={Another} />
+              </>
+            ) : (
+              <>
+                <Stack.Screen name="Onboarding" component={Onboarding} />
+              </>
+            )}
+          </Stack.Navigator>
+        </NavigationContainer>
+      </AuthProvider>
     </View>
   );
 }
@@ -109,7 +106,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
-
     width: "100%",
   },
 });
