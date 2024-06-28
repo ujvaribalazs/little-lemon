@@ -28,8 +28,8 @@ export default function Profile({ navigation }) {
         <Text style={styles.text}>Profile Screen</Text>
       </View>
       <View style={styles.buttonContainer}>
-        <Pressable onPress={() => navigation.navigate("Onboarding")}>
-          <Text style={styles.buttonText}>Back to Onboarding</Text>
+        <Pressable onPress={() => navigation.navigate("Home")}>
+          <Text style={styles.buttonText}>Back to Home</Text>
         </Pressable>
       </View>
       <View style={styles.buttonContainer}>

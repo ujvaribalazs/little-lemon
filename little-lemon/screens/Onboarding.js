@@ -158,6 +158,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     alignItems: "center",
     marginTop: 20,
+    marginBottom: 20,
   },
   buttonText: {
     color: "#344854",
