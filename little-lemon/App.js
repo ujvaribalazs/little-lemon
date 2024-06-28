@@ -19,6 +19,8 @@ export default function App() {
     "Karla-Regular": require("./assets/fonts/Karla-Regular.ttf"),
   });
 
+  // When the component first mounts, it ensures that the splash screen does not auto-hide by calling SplashScreen.preventAutoHideAsync().
+  // This is crucial for showing the splash screen until the fonts are loaded or an error occurs.
   useEffect(() => {
     async function prepare() {
       await SplashScreen.preventAutoHideAsync();
@@ -26,6 +28,8 @@ export default function App() {
     prepare();
   }, []);
 
+  // This ensures that the splash screen is hidden once the necessary resources (fonts) are ready
+  //  or if there's an error that prevents the resources from loading.
   const onLayoutRootView = useCallback(async () => {
     if (fontsLoaded || fontError) {
       await SplashScreen.hideAsync();
