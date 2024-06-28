@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Image } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -88,17 +88,36 @@ export default function App() {
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Home">
             <Stack.Screen name="Home" component={Home} />
-            <Stack.Screen name="Profile" component={Profile} />
+            <Stack.Screen
+              name="Profile"
+              component={Profile}
+              options={{
+                headerTitle: () => (
+                  <Image
+                    style={{ width: 30, height: 30 }}
+                    source={require("./assets/LLlogo.png")}
+                  />
+                ),
+                headerTitleAlign: "center",
+                headerRight: () => (
+                  <Image
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      marginRight: 10,
+                    }}
+                    source={require("./assets/nurse2.jpg")}
+                  />
+                ),
+                headerStyle: {
+                  backgroundColor: "#f3f3f3", // Customize the header background if needed
+                },
+              }}
+            />
 
-            {loginState ? (
-              <>
-                <Stack.Screen name="Another" component={Another} />
-              </>
-            ) : (
-              <>
-                <Stack.Screen name="Onboarding" component={Onboarding} />
-              </>
-            )}
+            <Stack.Screen name="Another" component={Another} />
+            <Stack.Screen name="Onboarding" component={Onboarding} />
           </Stack.Navigator>
         </NavigationContainer>
       </AuthProvider>

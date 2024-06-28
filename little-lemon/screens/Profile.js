@@ -14,14 +14,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../components/AuthContext";
 import { MaskedTextInput } from "react-native-mask-text";
+import nurseImage from "../assets/nurse2.jpg"; // Import the default image
 
 export default function Profile({ navigation }) {
-  const { setLoginState } = useAuth();
+  const { loginState, setLoginState } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [avatar, setAvatar] = useState(null);
+  const [avatar, setAvatar] = useState(
+    Image.resolveAssetSource(nurseImage).uri
+  ); // Initialize with default image URI
   const [emailNotifications, setEmailNotifications] = useState({
     promo: false,
     updates: false,
@@ -78,12 +81,17 @@ export default function Profile({ navigation }) {
       setAvatar(result.uri);
     }
   };
-
+  useEffect(() => {
+    if (!loginState) {
+      navigation.navigate("Onboarding");
+      console.log("loginState :", loginState);
+    }
+  }, [loginState]);
   const logOut = async () => {
     try {
       await AsyncStorage.clear();
       setLoginState(false);
-      navigation.navigate("Onboarding");
+      //navigation.navigate("Onboarding");
     } catch (e) {
       console.error(e);
     }
