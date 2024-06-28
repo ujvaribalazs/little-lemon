@@ -1,23 +1,24 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   Text,
   StyleSheet,
   TextInput,
   Image,
-  Button,
   Pressable,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import logo from "../assets/LLlogo.png";
-import { useState } from "react";
 
-export default function Onboarding({ navigation }) {
+export default function Onboarding({ route, navigation }) {
+  const { onDone } = route.params;
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [isFirstNameValid, setIsFirstNameValid] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const validateFirstName = (text) => {
     const isValid = text.length > 0 && /^[a-zA-Z ]+$/.test(text);
@@ -31,6 +32,21 @@ export default function Onboarding({ navigation }) {
     setIsEmailValid(isValid);
     setEmail(text);
   };
+
+  const storeLoginInfo = async (info) => {
+    try {
+      await AsyncStorage.setItem("@login", info.toString());
+      onDone(); // Hívja meg a callbacket az adatmentés után
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      storeLoginInfo(true);
+    }
+  }, [isLoggedIn]); // Effect runs when isLoggedIn changes.
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -69,10 +85,10 @@ export default function Onboarding({ navigation }) {
         <Pressable
           disabled={!isFirstNameValid || !isEmailValid}
           onPress={() => {
+            setIsLoggedIn(true);
+            storeLoginInfo(true);
             navigation.navigate("Profile");
           }}
-          //  Alert.alert("Thanks for subscribing, stay tuned!");
-          //}}
         >
           <Text
             style={[
@@ -140,7 +156,7 @@ const styles = StyleSheet.create({
     margin: 20,
 
     borderWidth: 2,
-    borderRadius: 5,
+    borderRadius: 10,
     borderColor: "#344854",
   },
   buttonContainer: {},
@@ -156,7 +172,7 @@ const styles = StyleSheet.create({
 
     borderColor: "#CBD2D9",
     backgroundColor: "#CBD2D9",
-    borderRadius: 5,
+    borderRadius: 10,
   },
   disableButtonText: {
     padding: 12,

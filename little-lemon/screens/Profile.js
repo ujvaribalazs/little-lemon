@@ -1,7 +1,17 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 
-export default function Profile({ navigation }) {
+export default function Profile({ route, navigation }) {
+  const { onDone } = route.params;
+  const logOut = async () => {
+    try {
+      await AsyncStorage.setItem("@login", "false");
+      onDone(); // Hívja meg a callbacket az adatmentés után
+    } catch (e) {
+      console.error(e);
+    }
+  };
   return (
     <View>
       <View style={styles.container}>
@@ -16,6 +26,15 @@ export default function Profile({ navigation }) {
           <Text style={styles.buttonText}>Back to Onboaarding</Text>
         </Pressable>
       </View>
+      <View style={styles.buttonContainer}>
+        <Pressable
+          onPress={() => {
+            logOut();
+          }}
+        >
+          <Text style={styles.buttonText}>Log out...</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -27,6 +46,7 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: "center",
+    marginTop: 30,
   },
   buttonContainer: {},
   buttonText: {
@@ -34,11 +54,10 @@ const styles = StyleSheet.create({
     padding: 12,
 
     textAlign: "center",
-    marginLeft: 200,
-    marginRight: 50,
+
     marginTop: 60,
     marginBottom: 40,
-
+    marginHorizontal: 30,
     borderColor: "#CBD2D9",
     backgroundColor: "#CBD2D9",
     borderRadius: 5,
