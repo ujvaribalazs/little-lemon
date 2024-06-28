@@ -27,21 +27,8 @@ export default function App() {
   if (!fontsLoaded && !fontError) {
     return null;
   }
-  const [initialRoute, setInitialRoute] = useState(null);
-  const readInitialLoginState = async () => {
-    try {
-      const state = await AsyncStorage.getItem("@login");
-      if (state !== null) {
-        setInitialRoute(state);
-        console.log(state);
-      } else {
-        setInitialRoute("Onboarding");
-      }
-    } catch (e) {
-      console.error(e);
-      setInitialRoute("Onboarding");
-    }
-  };
+  const [loginState, setLoginState] = useState(false);
+
   const loadingScreen = () => {
     return (
       <View>
@@ -49,24 +36,25 @@ export default function App() {
       </View>
     );
   };
-  useEffect(() => {
-    const readInitialLoginState = async () => {
-      try {
-        const state = await AsyncStorage.getItem("@login");
-        if (state !== null) {
-          setInitialRoute(state);
-          console.log(state);
-        } else {
-          setInitialRoute("Onboarding");
-        }
-      } catch (e) {
-        console.error(e);
-        setInitialRoute("Onboarding");
+
+  const readLoginState = async () => {
+    try {
+      const state = await AsyncStorage.getItem("@login");
+      if (state !== null) {
+        setLoginState(true);
+        console.log(state);
+      } else {
+        setLoginState(false);
       }
-    };
-    readInitialLoginState();
+    } catch (e) {
+      console.error(e);
+      setLoginState(false);
+    }
+  };
+  useEffect(() => {
+    readLoginState();
   }, []);
-  if (initialRoute === null) {
+  if (loginState === null) {
     return loadingScreen; // ide lehetne a betöltés alatti kezdőképernyő
   }
   return (
@@ -74,22 +62,22 @@ export default function App() {
       <StatusBar style="auto" />
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Home">
-          {initialRoute === "true" ? (
+          {loginState ? (
             <>
               <Stack.Screen
                 name="Profile"
                 component={Profile}
-                initialParams={{ onDone: readInitialLoginState }}
+                initialParams={{ onDone: readLoginState }}
               />
               <Stack.Screen
                 name="Home"
                 component={Home}
-                initialParams={{ onDone: readInitialLoginState }}
+                initialParams={{ onDone: readLoginState }}
               />
               <Stack.Screen
                 name="Another"
                 component={Another}
-                initialParams={{ onDone: readInitialLoginState }}
+                initialParams={{ onDone: readLoginState }}
               />
             </>
           ) : (
@@ -97,17 +85,17 @@ export default function App() {
               <Stack.Screen
                 name="Onboarding"
                 component={Onboarding}
-                initialParams={{ onDone: readInitialLoginState }}
+                initialParams={{ onDone: readLoginState }}
               />
               <Stack.Screen
                 name="Profile"
                 component={Profile}
-                initialParams={{ onDone: readInitialLoginState }}
+                initialParams={{ onDone: readLoginState }}
               />
               <Stack.Screen
                 name="Home"
                 component={Home}
-                initialParams={{ onDone: readInitialLoginState }}
+                initialParams={{ onDone: readLoginState }}
               />
             </>
           )}

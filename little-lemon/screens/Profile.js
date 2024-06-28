@@ -6,7 +6,7 @@ export default function Profile({ route, navigation }) {
   const { onDone } = route.params;
   const logOut = async () => {
     try {
-      await AsyncStorage.setItem("@login", "false");
+      await AsyncStorage.removeItem("@login");
       onDone(); // Hívja meg a callbacket az adatmentés után
     } catch (e) {
       console.error(e);
