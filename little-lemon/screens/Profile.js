@@ -164,6 +164,7 @@ export default function Profile({ navigation }) {
             style={styles.input}
             value={email}
             onChangeText={setEmail}
+            keyboardType="email-address"
           />
           <Text>Phone Number</Text>
           <MaskedTextInput
