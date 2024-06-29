@@ -1,15 +1,18 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { NavigationContainer } from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Onboarding from "./screens/Onboarding";
 import Profile from "./screens/Profile";
 import Another from "./screens/Another";
 import Home from "./screens/Home";
+import HeaderLeft from "./components/HeaderLeft";
+import HeaderCenter from "./components/HeaderCenter";
 import { AuthProvider } from "./components/AuthContext";
 
 const Stack = createNativeStackNavigator();
@@ -87,17 +90,16 @@ export default function App() {
       <AuthProvider>
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Home">
-            <Stack.Screen name="Home" component={Home} />
+            <Stack.Screen
+              name="Home"
+              component={Home}
+              options={{ title: "Home", headerTitleAlign: "center" }}
+            />
             <Stack.Screen
               name="Profile"
               component={Profile}
               options={{
-                headerTitle: () => (
-                  <Image
-                    style={{ width: 30, height: 30 }}
-                    source={require("./assets/LLlogo.png")}
-                  />
-                ),
+                headerTitle: () => <HeaderCenter />,
                 headerTitleAlign: "center",
                 headerRight: () => (
                   <Image
@@ -117,7 +119,14 @@ export default function App() {
             />
 
             <Stack.Screen name="Another" component={Another} />
-            <Stack.Screen name="Onboarding" component={Onboarding} />
+            <Stack.Screen
+              name="Onboarding"
+              component={Onboarding}
+              options={{
+                headerTitleAlign: "center",
+                headerLeft: () => <HeaderLeft />, // Use the custom header left component
+              }}
+            />
           </Stack.Navigator>
         </NavigationContainer>
       </AuthProvider>

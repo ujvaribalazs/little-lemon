@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
@@ -9,16 +9,24 @@ import {
   Pressable,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useAuth } from "../components/AuthContext";
+import { useFocusEffect } from "@react-navigation/native";
 import logo from "../assets/LLlogo.png";
 
 export default function Onboarding({ navigation }) {
-  const [firstName, setFirstName] = useState("");
-  const [email, setEmail] = useState("");
   const [isFirstNameValid, setIsFirstNameValid] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
-  const { loginState, setLoginState } = useAuth();
+  const {
+    firstName,
+    setFirstName,
+    email,
+    setEmail,
+    loginState,
+    setLoginState,
+  } = useAuth();
 
   const validateFirstName = (text) => {
     const isValid = text.length > 0 && /^[a-zA-Z ]+$/.test(text);
@@ -36,72 +44,79 @@ export default function Onboarding({ navigation }) {
   const storeLoginInfo = async (info) => {
     try {
       await AsyncStorage.setItem("@login", info.toString());
-      setLoginState(true);
       console.log("state from onboarding", loginState);
     } catch (e) {
       console.error(e);
     }
   };
 
-  useEffect(() => {
-    if (loginState) {
-      storeLoginInfo(true);
-    }
-  }, [loginState]);
+  const handleLogin = async () => {
+    setLoginState(true);
+    await storeLoginInfo(true);
+    navigation.navigate("Profile");
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      setIsFirstNameValid(
+        firstName.length > 0 && /^[a-zA-Z ]+$/.test(firstName)
+      );
+      setIsEmailValid(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email));
+    }, [firstName, email])
+  );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerText}>Little Lemon</Text>
-        <Image source={logo} style={styles.logo} />
-      </View>
-      <KeyboardAvoidingView
-        style={styles.formContainer}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
-        <Text style={styles.welcomeTitle}>Let us get to know You</Text>
-      </KeyboardAvoidingView>
-      <View style={{ backgroundColor: "#CBD2D9" }}>
-        <Text style={styles.title}>First Name</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Your first name"
-          value={firstName}
-          onChangeText={validateFirstName}
-          maxLength={250}
-        />
-        <Text style={styles.title}>Email</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="hello@email.com"
-          value={email}
-          onChangeText={validateEmail}
-          keyboardType="email-address"
-          clearButtonMode="always"
-          multiline={false}
-          maxLength={250}
-        />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Pressable
-          disabled={!isFirstNameValid || !isEmailValid}
-          onPress={() => {
-            setLoginState(true);
-            storeLoginInfo(true);
-            navigation.navigate("Profile");
-          }}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerText}>Little Lemon</Text>
+          <Image source={logo} style={styles.logo} />
+        </View>
+        <KeyboardAvoidingView
+          style={styles.formContainer}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
-          <Text
-            style={[
-              styles.buttonText,
-              (!isFirstNameValid || !isEmailValid) && styles.disableButtonText,
-            ]}
+          <Text style={styles.welcomeTitle}>Let us get to know You</Text>
+        </KeyboardAvoidingView>
+        <View style={{ backgroundColor: "#CBD2D9" }}>
+          <Text style={styles.title}>First Name</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Your first name"
+            value={firstName}
+            onChangeText={validateFirstName}
+            maxLength={250}
+          />
+          <Text style={styles.title}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="hello@email.com"
+            value={email}
+            onChangeText={validateEmail}
+            keyboardType="email-address"
+            clearButtonMode="always"
+            multiline={false}
+            maxLength={250}
+          />
+        </View>
+        <View style={styles.buttonContainer}>
+          <Pressable
+            disabled={!isFirstNameValid || !isEmailValid}
+            onPress={handleLogin}
           >
-            Next
-          </Text>
-        </Pressable>
+            <Text
+              style={[
+                styles.buttonText,
+                (!isFirstNameValid || !isEmailValid) &&
+                  styles.disableButtonText,
+              ]}
+            >
+              Log in
+            </Text>
+          </Pressable>
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 

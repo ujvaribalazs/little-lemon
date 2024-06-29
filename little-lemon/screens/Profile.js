@@ -7,9 +7,11 @@ import {
   Image,
   Button,
   TouchableOpacity,
+  Alert,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import CheckBox from "expo-checkbox";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../components/AuthContext";
@@ -17,10 +19,15 @@ import { MaskedTextInput } from "react-native-mask-text";
 import nurseImage from "../assets/nurse2.jpg"; // Import the default image
 
 export default function Profile({ navigation }) {
-  const { loginState, setLoginState } = useAuth();
-  const [firstName, setFirstName] = useState("");
+  const {
+    loginState,
+    setLoginState,
+    firstName,
+    setFirstName,
+    email,
+    setEmail,
+  } = useAuth();
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [avatar, setAvatar] = useState(
     Image.resolveAssetSource(nurseImage).uri
@@ -64,9 +71,28 @@ export default function Profile({ navigation }) {
         "emailNotifications",
         JSON.stringify(emailNotifications)
       );
+      Alert.alert("Success", "Profile data saved successfully.");
     } catch (e) {
       console.error(e);
+      Alert.alert("Error", "Failed to save profile data.");
     }
+  };
+
+  const validateAndSaveProfileData = () => {
+    const phoneRegex = /^\(\d{3}\) \d{3}-\d{4}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!phoneRegex.test(phoneNumber)) {
+      Alert.alert("Invalid Phone Number", "Please enter a valid phone number.");
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
+      return;
+    }
+
+    saveProfileData();
   };
 
   const pickImage = async () => {
@@ -81,97 +107,104 @@ export default function Profile({ navigation }) {
       setAvatar(result.uri);
     }
   };
+
   useEffect(() => {
     if (!loginState) {
       navigation.navigate("Onboarding");
       console.log("loginState :", loginState);
     }
   }, [loginState]);
+
   const logOut = async () => {
     try {
       await AsyncStorage.clear();
       setLoginState(false);
-      //navigation.navigate("Onboarding");
     } catch (e) {
       console.error(e);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerText}>Profile</Text>
-        {/* Inactive back button */}
-        <Button title="Back" disabled />
-      </View>
-      <View style={styles.avatarContainer}>
-        <TouchableOpacity onPress={pickImage}>
-          {avatar ? (
-            <Image source={{ uri: avatar }} style={styles.avatar} />
-          ) : (
-            <View style={styles.placeholderAvatar}>
-              <Text style={styles.avatarInitials}>
-                {firstName.charAt(0)}
-                {lastName.charAt(0)}
-              </Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      </View>
-      <View style={styles.formContainer}>
-        <Text>First Name</Text>
-        <TextInput
-          style={styles.input}
-          value={firstName}
-          onChangeText={setFirstName}
-        />
-        <Text>Last Name</Text>
-        <TextInput
-          style={styles.input}
-          value={lastName}
-          onChangeText={setLastName}
-        />
-        <Text>Email</Text>
-        <TextInput style={styles.input} value={email} onChangeText={setEmail} />
-        <Text>Phone Number</Text>
-        <MaskedTextInput
-          style={styles.input}
-          mask="(999) 999-9999"
-          keyboardType="numeric"
-          value={phoneNumber}
-          onChangeText={setPhoneNumber}
-        />
-        <View style={styles.checkboxContainer}>
-          <Text>Email Notifications</Text>
-          <View style={styles.checkbox}>
-            <Text>Promotions</Text>
-            <CheckBox
-              value={emailNotifications.promo}
-              onValueChange={(newValue) =>
-                setEmailNotifications((prevState) => ({
-                  ...prevState,
-                  promo: newValue,
-                }))
-              }
-            />
-          </View>
-          <View style={styles.checkbox}>
-            <Text>Updates</Text>
-            <CheckBox
-              value={emailNotifications.updates}
-              onValueChange={(newValue) =>
-                setEmailNotifications((prevState) => ({
-                  ...prevState,
-                  updates: newValue,
-                }))
-              }
-            />
-          </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.headerText}>Profile</Text>
+          {/* Inactive back button */}
+          <Button title="Back" disabled />
         </View>
-        <Button title="Save Changes" onPress={saveProfileData} />
-        <Button title="Log Out" onPress={logOut} />
+        <View style={styles.avatarContainer}>
+          <TouchableOpacity onPress={pickImage}>
+            {avatar ? (
+              <Image source={{ uri: avatar }} style={styles.avatar} />
+            ) : (
+              <View style={styles.placeholderAvatar}>
+                <Text style={styles.avatarInitials}>
+                  {firstName.charAt(0)}
+                  {lastName.charAt(0)}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+        <View style={styles.formContainer}>
+          <Text>First Name</Text>
+          <TextInput
+            style={styles.input}
+            value={firstName}
+            onChangeText={setFirstName}
+          />
+          <Text>Last Name</Text>
+          <TextInput
+            style={styles.input}
+            value={lastName}
+            onChangeText={setLastName}
+          />
+          <Text>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+          />
+          <Text>Phone Number</Text>
+          <MaskedTextInput
+            style={styles.input}
+            mask="(999) 999-9999"
+            keyboardType="numeric"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+          />
+          <View style={styles.checkboxContainer}>
+            <Text>Email Notifications</Text>
+            <View style={styles.checkbox}>
+              <Text>Promotions</Text>
+              <CheckBox
+                value={emailNotifications.promo}
+                onValueChange={(newValue) =>
+                  setEmailNotifications((prevState) => ({
+                    ...prevState,
+                    promo: newValue,
+                  }))
+                }
+              />
+            </View>
+            <View style={styles.checkbox}>
+              <Text>Updates</Text>
+              <CheckBox
+                value={emailNotifications.updates}
+                onValueChange={(newValue) =>
+                  setEmailNotifications((prevState) => ({
+                    ...prevState,
+                    updates: newValue,
+                  }))
+                }
+              />
+            </View>
+          </View>
+          <Button title="Save Changes" onPress={validateAndSaveProfileData} />
+          <Button title="Log Out" onPress={logOut} />
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
