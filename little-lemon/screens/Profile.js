@@ -201,8 +201,15 @@ export default function Profile({ navigation }) {
               />
             </View>
           </View>
-          <Button title="Save Changes" onPress={validateAndSaveProfileData} />
-          <Button title="Log Out" onPress={logOut} />
+          <TouchableOpacity
+            style={styles.buttonSave}
+            onPress={validateAndSaveProfileData}
+          >
+            <Text>Save Changes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.buttonLogout} onPress={logOut}>
+            <Text style={styles.buttonText}>Log Out</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </TouchableWithoutFeedback>
@@ -250,8 +257,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   input: {
-    borderBottomWidth: 1,
+    borderWidth: 1,
+    padding: 5,
+
+    borderColor: "lightgrey",
+
+    borderRadius: 7,
     marginBottom: 10,
+    borderBottomWidth: 3,
+    borderBottomColor: "#495E57",
   },
   checkboxContainer: {
     marginVertical: 20,
@@ -261,5 +275,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 10,
+  },
+  buttonSave: {
+    backgroundColor: "#FECE14",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  buttonLogout: {
+    backgroundColor: "#495E57",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  buttonText: {
+    color: "white",
   },
 });

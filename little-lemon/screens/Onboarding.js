@@ -12,6 +12,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
+//import { Card } from "react-native-elements";
 import { useAuth } from "../components/AuthContext";
 import { useFocusEffect } from "@react-navigation/native";
 import logo from "../assets/LLlogo.png";
@@ -72,6 +73,7 @@ export default function Onboarding({ navigation }) {
           <Text style={styles.headerText}>Little Lemon</Text>
           <Image source={logo} style={styles.logo} />
         </View>
+
         <KeyboardAvoidingView
           style={styles.formContainer}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -176,15 +178,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   buttonText: {
-    color: "#344854",
+    color: "white",
     padding: 12,
     textAlign: "center",
     borderColor: "#CBD2D9",
-    backgroundColor: "#CBD2D9",
+    backgroundColor: "#495E57",
     borderRadius: 10,
     width: 200,
   },
   disableButtonText: {
     color: "gray",
+    backgroundColor: "#F4CE14",
   },
 });
