@@ -25,6 +25,7 @@
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "entryPoint": "./src/expo/AppEntry.js"
   }
 }

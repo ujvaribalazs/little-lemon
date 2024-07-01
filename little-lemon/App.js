@@ -17,7 +17,7 @@ import { AuthProvider, useAuth } from "./components/AuthContext";
 const Stack = createNativeStackNavigator();
 
 export default function App() {
-  const [fontsLoaded, fontError] = useFonts({
+  const [fontsLoaded] = useFonts({
     "Karla-Regular": require("./assets/fonts/Karla-Regular.ttf"),
   });
 
@@ -29,10 +29,14 @@ export default function App() {
   }, []);
 
   const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded || fontError) {
+    if (fontsLoaded) {
       await SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded]);
+
+  if (!fontsLoaded) {
+    return null; // You can show a loading screen here if you want
+  }
 
   return (
     <AuthProvider>
