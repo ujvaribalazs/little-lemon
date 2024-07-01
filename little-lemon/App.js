@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Image } from "react-native";
+import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -63,7 +63,28 @@ const Navigation = () => {
             <Stack.Screen
               name="Home"
               component={Home}
-              options={{ title: "Home", headerTitleAlign: "center" }}
+              options={({ navigation }) => ({
+                headerTitle: () => <HeaderCenter />,
+                headerTitleAlign: "center",
+                headerRight: () => (
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("Profile")}
+                  >
+                    <Image
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        marginRight: 10,
+                      }}
+                      source={require("./assets/nurse2.jpg")}
+                    />
+                  </TouchableOpacity>
+                ),
+                headerStyle: {
+                  backgroundColor: "#f3f3f3",
+                },
+              })}
             />
             <Stack.Screen
               name="Profile"
