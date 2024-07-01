@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
@@ -54,7 +54,7 @@ export default function Onboarding({ navigation }) {
   const handleLogin = async () => {
     setLoginState(true);
     await storeLoginInfo(true);
-    navigation.navigate("Profile");
+    navigation.navigate("Home");
   };
 
   useFocusEffect(
