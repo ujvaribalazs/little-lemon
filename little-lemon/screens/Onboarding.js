@@ -1,3 +1,4 @@
+// Onboarding.js
 import React, { useState, useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -12,7 +13,6 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
 } from "react-native";
-//import { Card } from "react-native-elements";
 import { useAuth } from "../components/AuthContext";
 import { useFocusEffect } from "@react-navigation/native";
 import logo from "../assets/LLlogo.png";
@@ -20,14 +20,7 @@ import logo from "../assets/LLlogo.png";
 export default function Onboarding({ navigation }) {
   const [isFirstNameValid, setIsFirstNameValid] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
-  const {
-    firstName,
-    setFirstName,
-    email,
-    setEmail,
-    loginState,
-    setLoginState,
-  } = useAuth();
+  const { firstName, setFirstName, email, setEmail, setLoginState } = useAuth();
 
   const validateFirstName = (text) => {
     const isValid = text.length > 0 && /^[a-zA-Z ]+$/.test(text);
@@ -45,7 +38,6 @@ export default function Onboarding({ navigation }) {
   const storeLoginInfo = async (info) => {
     try {
       await AsyncStorage.setItem("@login", info.toString());
-      console.log("state from onboarding", loginState);
     } catch (e) {
       console.error(e);
     }

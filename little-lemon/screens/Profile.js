@@ -1,3 +1,4 @@
+// Profile.js
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -129,7 +130,6 @@ export default function Profile({ navigation }) {
       <View style={styles.container}>
         <View style={styles.headerContainer}>
           <Text style={styles.headerText}>Profile</Text>
-          {/* Inactive back button */}
           <Button title="Back" disabled />
         </View>
         <View style={styles.avatarContainer}>
@@ -259,9 +259,7 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     padding: 5,
-
     borderColor: "lightgrey",
-
     borderRadius: 7,
     marginBottom: 10,
     borderBottomWidth: 3,
