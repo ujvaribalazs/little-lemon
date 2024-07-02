@@ -7,15 +7,16 @@ import {
   FlatList,
   StyleSheet,
   ActivityIndicator,
+  ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import { memo } from "react";
-import * as SQLite from "expo-sqlite";
+import * as SQLite from "expo-sqlite/legacy";
 import { useNavigation } from "@react-navigation/native";
 import { useAuth } from "../components/AuthContext";
 
-const openDatabase = async () => {
-  const db = await SQLite.openDatabaseAsync("little_lemon.db");
-  await db.execAsync("PRAGMA journal_mode = WAL");
+const openDatabase = () => {
+  const db = SQLite.openDatabase("little_lemon.db");
   return db;
 };
 
@@ -23,8 +24,26 @@ const Home = () => {
   const { loginState } = useAuth();
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCategories, setSelectedCategories] = useState([
+    "Desserts",
+    "Drinks",
+  ]);
   const navigation = useNavigation();
   const [db, setDb] = useState(null);
+
+  const categories = ["starters", "mains", "desserts", "drinks", "specials"];
+
+  const toggleCategory = (category) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((item) => item !== category)
+        : [...prev, category]
+    );
+    console.log(
+      "from toggleCategory, the selected category: ",
+      selectedCategories
+    );
+  };
 
   const fetchMenuData = async (db) => {
     try {
@@ -47,69 +66,129 @@ const Home = () => {
     }
   };
 
-  const storeDataInSQLite = async (db, menuData) => {
+  const storeDataInSQLite = (db, menuData) => {
     if (!db) {
       console.error("Database not initialized.");
       return;
     }
-    try {
-      console.log("Storing data in SQLite...");
-      await db.execAsync("DELETE FROM menu");
-      for (const item of menuData) {
-        console.log(`Storing item: ${item.name}`);
-        await db.runAsync(
-          "INSERT INTO menu (name, price, description, image) VALUES (?, ?, ?, ?)",
-          [item.name, item.price, item.description, item.image]
+    db.transaction((tx) => {
+      tx.executeSql("DELETE FROM menu");
+      menuData.forEach((item) => {
+        tx.executeSql(
+          "INSERT INTO menu (name, price, description, image, category) VALUES (?, ?, ?, ?, ?)",
+          [item.name, item.price, item.description, item.image, item.category],
+          (_, result) => {
+            console.log(`Stored item: ${item.name}`);
+          },
+          (_, error) => {
+            console.error("Error storing data in SQLite:", error);
+            return false;
+          }
         );
-      }
-    } catch (error) {
-      console.error("Error storing data in SQLite:", error);
-    }
+      });
+    });
   };
 
-  const loadMenuFromSQLite = async (db) => {
+  const loadMenuFromSQLite = (db) => {
     if (!db) {
       console.error("Database not initialized.");
       return;
     }
-    try {
-      console.log("Loading data from SQLite...");
-      const result = await db.getAllAsync("SELECT * FROM menu");
-      console.log("Loaded Menu Items from SQLite:", result);
-      setMenuItems(result);
-      setLoading(false);
-    } catch (error) {
-      console.error("Error loading data from SQLite:", error);
+    db.transaction((tx) => {
+      let query = "SELECT * FROM menu";
+      const params = [];
+      console.log("query1:", query);
+      console.log(selectedCategories.length);
+      console.log("selected category: ", selectedCategories);
+      if (selectedCategories.length > 0) {
+        const placeholders = selectedCategories.map(() => "?").join(",");
+        console.log("placeholders", placeholders);
+        query += ` WHERE category IN (${placeholders})`;
+        params.push(...selectedCategories);
+        console.log("params: ", params);
+      }
+      console.log("query2:", query);
+      tx.executeSql(
+        query,
+        params,
+        (_, { rows: { _array } }) => {
+          if (_array.length) {
+            console.log("Loaded Menu Items from SQLite:", _array);
+            setMenuItems(_array);
+          } else {
+            console.log("No menu items found in SQLite.");
+            setMenuItems([]);
+          }
+          setLoading(false);
+        },
+        (_, error) => {
+          console.error("LMFSL: Error loading data from SQLite:", error);
+          return false;
+        }
+      );
+    });
+  };
+
+  const checkDatabaseContent = (db) => {
+    if (!db) {
+      console.error("Database not initialized.");
+      return;
     }
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM menu",
+        [],
+        (_, { rows: { _array } }) => {
+          if (_array.length) {
+            console.log("Current Menu Items in SQLite:");
+            _array.forEach((item) => {
+              console.log(item);
+            });
+          } else {
+            console.log("No menu items found in SQLite.");
+          }
+        },
+        (_, error) => {
+          console.error("Error checking database content:", error);
+          return false;
+        }
+      );
+    });
   };
 
   useEffect(() => {
     const initializeDatabase = async () => {
       try {
         console.log("Initializing database...");
-        const database = await openDatabase();
-        setDb(database);
+        const db = openDatabase();
+        setDb(db);
 
-        await database.execAsync(`
-          CREATE TABLE IF NOT EXISTS menu (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            price REAL,
-            description TEXT,
-            image TEXT
+        db.transaction((tx) => {
+          tx.executeSql(`
+            CREATE TABLE IF NOT EXISTS menu (
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              name TEXT,
+              price REAL,
+              description TEXT,
+              image TEXT,
+              category TEXT
+            );
+          `);
+          tx.executeSql(
+            "SELECT count(*) as count FROM menu",
+            [],
+            async (_, { rows: { _array } }) => {
+              if (_array[0].count === 0) {
+                console.log("No data in database, fetching from API...");
+                await fetchMenuData(db);
+              } else {
+                console.log("Data found in database, loading...");
+                loadMenuFromSQLite(db);
+              }
+              checkDatabaseContent(db); // Check database content after initialization
+            }
           );
-        `);
-
-        const result = await database.getFirstAsync(
-          "SELECT count(*) as count FROM menu"
-        );
-        if (result.count === 0) {
-          console.log("No data in database, fetching from API...");
-          await fetchMenuData(database);
-        } else {
-          console.log("Data found in database, loading...");
-          await loadMenuFromSQLite(database);
-        }
+        });
       } catch (error) {
         console.error("Error initializing database:", error);
         setLoading(false); // Ensure loading state is updated in case of error
@@ -118,6 +197,13 @@ const Home = () => {
 
     initializeDatabase();
   }, [loginState]);
+
+  useEffect(() => {
+    if (db) {
+      loadMenuFromSQLite(db);
+      checkDatabaseContent(db); // Check database content after category selection
+    }
+  }, [selectedCategories]);
 
   const renderItem = ({ item }) => <MenuItem item={item} />;
 
@@ -146,6 +232,31 @@ const Home = () => {
           style={styles.headerImage}
           source={require("../assets/WelcomeHeader.jpg")}
         />
+      </View>
+      <View style={styles.categoryContainer}>
+        <ScrollView horizontal style={styles.scrollView}>
+          {categories.map((category) => (
+            <TouchableOpacity
+              key={category}
+              style={[
+                styles.categoryButton,
+                selectedCategories.includes(category) &&
+                  styles.selectedCategory,
+              ]}
+              onPress={() => toggleCategory(category)}
+            >
+              <Text
+                style={[
+                  styles.categoryText,
+                  selectedCategories.includes(category) &&
+                    styles.selectedCategoryText,
+                ]}
+              >
+                {category}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
       <FlatList
         data={menuItems}
@@ -188,6 +299,7 @@ const MenuItem = memo(({ item }) => {
     </View>
   );
 });
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -252,6 +364,29 @@ const styles = StyleSheet.create({
   menuItemPrice: {
     marginTop: 5,
     fontWeight: "bold",
+  },
+  scrollView: {
+    marginVertical: 10,
+  },
+  categoryButton: {
+    padding: 10,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 20,
+    marginHorizontal: 5,
+  },
+  selectedCategory: {
+    backgroundColor: "#000",
+  },
+  categoryText: {
+    color: "#000",
+  },
+  selectedCategoryText: {
+    color: "#fff",
+  },
+  categoryContainer: {
+    height: 80, // Fix height for the category selector
+    flexDirection: "row",
+    alignItems: "center",
   },
 });
 
