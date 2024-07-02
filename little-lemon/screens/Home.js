@@ -1,3 +1,4 @@
+// Home.js
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -24,10 +25,7 @@ const Home = () => {
   const { loginState } = useAuth();
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCategories, setSelectedCategories] = useState([
-    "Desserts",
-    "Drinks",
-  ]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchText, setSearchText] = useState("");
   const navigation = useNavigation();
   const [db, setDb] = useState(null);
@@ -40,24 +38,15 @@ const Home = () => {
         ? prev.filter((item) => item !== category)
         : [...prev, category]
     );
-    console.log(
-      "from toggleCategory, the selected category: ",
-      selectedCategories
-    );
   };
 
   const fetchMenuData = async (db) => {
     try {
-      console.log("Fetching menu data...");
       const response = await fetch(
         "https://raw.githubusercontent.com/Meta-Mobile-Developer-PC/Working-With-Data-API/main/capstone.json"
       );
       const data = await response.json();
       const menuData = data.menu;
-
-      console.log("Menu Data Length:", menuData.length);
-      console.log("Menu Data:", menuData);
-
       await storeDataInSQLite(db, menuData);
       setMenuItems(menuData);
     } catch (error) {
@@ -98,37 +87,36 @@ const Home = () => {
     db.transaction((tx) => {
       let query = "SELECT * FROM menu";
       const params = [];
-      console.log("query1:", query);
-      console.log(selectedCategories.length);
-      console.log("selected category: ", selectedCategories);
+
       if (selectedCategories.length > 0) {
         const placeholders = selectedCategories.map(() => "?").join(",");
-        console.log("placeholders", placeholders);
         query += ` WHERE category IN (${placeholders})`;
         params.push(...selectedCategories);
-        console.log("params: ", params);
       }
+
       if (searchText.trim()) {
         query += selectedCategories.length > 0 ? ` AND` : ` WHERE`;
         query += ` name LIKE ?`;
         params.push(`%${searchText.trim()}%`);
       }
-      console.log("query2:", query);
+
+      console.log("Constructed SQL Query:", query);
+      console.log("With Parameters:", params);
+
       tx.executeSql(
         query,
         params,
         (_, { rows: { _array } }) => {
-          if (_array.length) {
+          if (_array.length > 0) {
             console.log("Loaded Menu Items from SQLite:", _array);
-            setMenuItems(_array);
           } else {
             console.log("No menu items found in SQLite.");
-            setMenuItems([]);
           }
+          setMenuItems(_array.length ? _array : []);
           setLoading(false);
         },
         (_, error) => {
-          console.error("LMFSL: Error loading data from SQLite:", error);
+          console.error("Error loading data from SQLite:", error);
           return false;
         }
       );
@@ -145,14 +133,7 @@ const Home = () => {
         "SELECT * FROM menu",
         [],
         (_, { rows: { _array } }) => {
-          if (_array.length) {
-            console.log("Current Menu Items in SQLite:");
-            _array.forEach((item) => {
-              console.log(item);
-            });
-          } else {
-            console.log("No menu items found in SQLite.");
-          }
+          console.log("Current Menu Items in SQLite:", _array);
         },
         (_, error) => {
           console.error("Error checking database content:", error);
@@ -165,7 +146,6 @@ const Home = () => {
   useEffect(() => {
     const initializeDatabase = async () => {
       try {
-        console.log("Initializing database...");
         const db = openDatabase();
         setDb(db);
 
@@ -185,19 +165,17 @@ const Home = () => {
             [],
             async (_, { rows: { _array } }) => {
               if (_array[0].count === 0) {
-                console.log("No data in database, fetching from API...");
                 await fetchMenuData(db);
               } else {
-                console.log("Data found in database, loading...");
                 loadMenuFromSQLite(db);
               }
-              checkDatabaseContent(db); // Check database content after initialization
+              checkDatabaseContent(db);
             }
           );
         });
       } catch (error) {
         console.error("Error initializing database:", error);
-        setLoading(false); // Ensure loading state is updated in case of error
+        setLoading(false);
       }
     };
 
@@ -207,7 +185,6 @@ const Home = () => {
   useEffect(() => {
     if (db) {
       loadMenuFromSQLite(db);
-      checkDatabaseContent(db); // Check database content after category selection
     }
   }, [selectedCategories, searchText]);
 
@@ -220,8 +197,6 @@ const Home = () => {
       </View>
     );
   }
-
-  console.log("Rendering Menu Items Length:", menuItems.length);
 
   return (
     <View style={styles.container}>
@@ -285,7 +260,6 @@ const MenuItem = memo(({ item }) => {
   });
 
   const handleError = () => {
-    console.error(`Failed to load image: ${item.image}`);
     setImageSource(
       item.image === "lemonDessert.jpg"
         ? require("../assets/lemonDessert.png")
@@ -396,7 +370,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   categoryContainer: {
-    height: 80, // Fix height for the category selector
+    height: 80,
     flexDirection: "row",
     alignItems: "center",
   },
