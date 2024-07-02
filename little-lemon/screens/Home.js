@@ -1,4 +1,3 @@
-// Home.js
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -9,6 +8,7 @@ import {
   ActivityIndicator,
   ScrollView,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
 import { memo } from "react";
 import * as SQLite from "expo-sqlite/legacy";
@@ -28,6 +28,7 @@ const Home = () => {
     "Desserts",
     "Drinks",
   ]);
+  const [searchText, setSearchText] = useState("");
   const navigation = useNavigation();
   const [db, setDb] = useState(null);
 
@@ -106,6 +107,11 @@ const Home = () => {
         query += ` WHERE category IN (${placeholders})`;
         params.push(...selectedCategories);
         console.log("params: ", params);
+      }
+      if (searchText.trim()) {
+        query += selectedCategories.length > 0 ? ` AND` : ` WHERE`;
+        query += ` name LIKE ?`;
+        params.push(`%${searchText.trim()}%`);
       }
       console.log("query2:", query);
       tx.executeSql(
@@ -203,7 +209,7 @@ const Home = () => {
       loadMenuFromSQLite(db);
       checkDatabaseContent(db); // Check database content after category selection
     }
-  }, [selectedCategories]);
+  }, [selectedCategories, searchText]);
 
   const renderItem = ({ item }) => <MenuItem item={item} />;
 
@@ -227,6 +233,12 @@ const Home = () => {
             We are a family owned Mediterranean restaurant, focused on
             traditional recipes served with a modern twist.
           </Text>
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Search for a dish..."
+            value={searchText}
+            onChangeText={(text) => setSearchText(text)}
+          />
         </View>
         <Image
           style={styles.headerImage}
@@ -387,6 +399,12 @@ const styles = StyleSheet.create({
     height: 80, // Fix height for the category selector
     flexDirection: "row",
     alignItems: "center",
+  },
+  searchBar: {
+    marginTop: 10,
+    padding: 10,
+    borderRadius: 5,
+    backgroundColor: "#fff",
   },
 });
 
