@@ -1,5 +1,4 @@
-// Onboarding.js
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
@@ -12,16 +11,21 @@ import {
   Platform,
   Keyboard,
   TouchableWithoutFeedback,
+  ScrollView,
 } from "react-native";
 import { useAuth } from "../components/AuthContext";
 import { useFocusEffect } from "@react-navigation/native";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
 import logo from "../assets/LLlogo.png";
-import logoGrey from "../assets/little-lemon-logo-grey.png";
 
 export default function Onboarding({ navigation }) {
   const [isFirstNameValid, setIsFirstNameValid] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
   const { firstName, setFirstName, email, setEmail, setLoginState } = useAuth();
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   const validateFirstName = (text) => {
     const isValid = text.length > 0 && /^[a-zA-Z ]+$/.test(text);
@@ -49,6 +53,10 @@ export default function Onboarding({ navigation }) {
     await storeLoginInfo(true);
     navigation.navigate("Home");
   };
+  const handleClear = async () => {
+    await setFirstName("");
+    await setEmail("");
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -59,26 +67,60 @@ export default function Onboarding({ navigation }) {
     }, [firstName, email])
   );
 
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      "keyboardDidShow",
+      () => {
+        setKeyboardVisible(true);
+      }
+    );
+    const keyboardDidHideListener = Keyboard.addListener(
+      "keyboardDidHide",
+      () => {
+        setKeyboardVisible(false);
+      }
+    );
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <View style={styles.headerContainer}>
-          <Text style={styles.headerText}>Little Lemon</Text>
+          <Text style={styles.headerLemon}>Little Lemon</Text>
           <Image source={logo} style={styles.logo} />
         </View>
 
-        <KeyboardAvoidingView
-          style={styles.formContainer}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        {!isKeyboardVisible && (
+          <View style={styles.heroContainer}>
+            <View style={styles.headerTextContainer}>
+              <Text style={styles.headerTitle}>Little Lemon</Text>
+              <Text style={styles.headerLocation}>Chicago</Text>
+              <Text style={styles.headerText}>
+                We are a family owned Mediterranean restaurant, focused on
+                traditional recipes served with a modern twist.
+              </Text>
+            </View>
+            <Image
+              style={styles.headerImage}
+              source={require("../assets/WelcomeHeader.jpg")}
+            />
+          </View>
+        )}
+        <ScrollView
+          style={styles.inputContainer}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={true}
+          showsHorizontalScrollIndicator={false}
         >
-          <Text style={styles.welcomeTitle}>Let us get to know You</Text>
-          <Image source={logoGrey} style={styles.logoGrey} />
-        </KeyboardAvoidingView>
-        <View style={{ backgroundColor: "#CBD2D9" }}>
           <Text style={styles.title}>First Name</Text>
           <TextInput
             style={styles.input}
-            placeholder=" type your first name"
+            placeholder=" type your here first name"
             value={firstName}
             onChangeText={validateFirstName}
             maxLength={250}
@@ -86,7 +128,7 @@ export default function Onboarding({ navigation }) {
           <Text style={styles.title}>Email</Text>
           <TextInput
             style={styles.input}
-            placeholder=" type your email"
+            placeholder=" type here your email"
             value={email}
             onChangeText={validateEmail}
             keyboardType="email-address"
@@ -94,8 +136,22 @@ export default function Onboarding({ navigation }) {
             multiline={false}
             maxLength={250}
           />
-        </View>
+        </ScrollView>
+
         <View style={styles.buttonContainer}>
+          <Pressable
+            //disabled={isFirstNameValid || isEmailValid}
+            onPress={handleClear}
+          >
+            <Text
+              style={[
+                styles.buttonText,
+                !firstName && !email && styles.disableButtonText,
+              ]}
+            >
+              Clear
+            </Text>
+          </Pressable>
           <Pressable
             disabled={!isFirstNameValid || !isEmailValid}
             onPress={handleLogin}
@@ -107,7 +163,7 @@ export default function Onboarding({ navigation }) {
                   styles.disableButtonText,
               ]}
             >
-              Log in
+              NEXT
             </Text>
           </Pressable>
         </View>
@@ -120,74 +176,111 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 0,
-    width: "100%",
+    width: wp("100%"),
   },
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 20,
-    paddingHorizontal: 80,
+    marginTop: hp("2%"),
+    paddingHorizontal: wp("20%"),
     backgroundColor: "#DEE3E9",
+  },
+  heroContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#495E57",
+  },
+  headerTextContainer: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  headerTitle: {
+    fontSize: 30,
+    color: "#F4CE14",
+    fontWeight: "bold",
+  },
+  headerLocation: {
+    fontSize: 26,
+    color: "#ffffff",
+  },
+  headerText: {
+    fontSize: 14,
+    color: "#ffffff",
+  },
+  headerImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 8,
   },
   formContainer: {
     backgroundColor: "#CBD2D9",
     flex: 1,
   },
-  headerText: {
+  headerLemon: {
     color: "#495E57",
-    fontSize: 30,
-    padding: 20,
+    fontSize: wp("8%"),
+    padding: wp("2%"),
     fontFamily: "Karla-Regular",
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: wp("12%"),
+    height: hp("6%"),
     resizeMode: "contain",
-  },
-  logoGrey: {
-    width: 150,
-    height: 150,
-    resizeMode: "contain",
-    alignSelf: "center",
   },
   welcomeTitle: {
-    paddingVertical: 40,
+    paddingVertical: hp("5%"),
     textAlign: "center",
-    paddingTop: 60,
-    paddingBottom: 40,
-    fontSize: 36,
+    paddingTop: hp("7%"),
+    paddingBottom: hp("2%"),
+    fontSize: wp("8%"),
     color: "#344854",
   },
   title: {
     textAlign: "center",
     fontWeight: "medium",
-    fontSize: 36,
+    fontSize: wp("5%"),
     color: "#344854",
   },
+  inputContainer: {
+    flex: 1,
+    padding: wp("3%"),
+  },
+  scrollContent: {
+    alignItems: "center",
+  },
   input: {
-    fontSize: 20,
-    padding: 10,
-    marginVertical: 20,
-    marginHorizontal: 40,
+    fontSize: wp("5%"),
+    padding: wp("1.5%"),
+    marginTop: hp("2%"),
+    marginBottom: hp("1%"),
+    marginHorizontal: wp("10%"),
     borderWidth: 2,
     borderRadius: 10,
     borderColor: "#344854",
     backgroundColor: "#A7B7AB",
+    width: wp("70%"),
   },
   buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 20,
-    marginBottom: 20,
+    padding: 10,
+    alignItems: "center",
+    marginTop: hp("1%"),
+    marginBottom: hp("1%"),
+    marginHorizontal: 75,
   },
   buttonText: {
     color: "white",
-    padding: 12,
+    padding: wp("2%"),
     textAlign: "center",
     borderColor: "#CBD2D9",
     backgroundColor: "#495E57",
     borderRadius: 10,
-    width: 150,
+    width: wp("20%"),
   },
   disableButtonText: {
     color: "#495E57",

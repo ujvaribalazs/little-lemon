@@ -11,6 +11,9 @@ import {
   Alert,
   Keyboard,
   TouchableWithoutFeedback,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import CheckBox from "expo-checkbox";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -127,91 +130,96 @@ export default function Profile({ navigation }) {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerText}>Profile</Text>
-          <Button title="Back" disabled />
-        </View>
-        <View style={styles.avatarContainer}>
-          <TouchableOpacity onPress={pickImage}>
-            {avatar ? (
-              <Image source={{ uri: avatar }} style={styles.avatar} />
-            ) : (
-              <View style={styles.placeholderAvatar}>
-                <Text style={styles.avatarInitials}>
-                  {firstName.charAt(0)}
-                  {lastName.charAt(0)}
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-        <View style={styles.formContainer}>
-          <Text>First Name</Text>
-          <TextInput
-            style={styles.input}
-            value={firstName}
-            onChangeText={setFirstName}
-          />
-          <Text>Last Name</Text>
-          <TextInput
-            style={styles.input}
-            value={lastName}
-            onChangeText={setLastName}
-          />
-          <Text>Email</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-          />
-          <Text>Phone Number</Text>
-          <MaskedTextInput
-            style={styles.input}
-            mask="(999) 999-9999"
-            keyboardType="numeric"
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-          />
-          <View style={styles.checkboxContainer}>
-            <Text>Email Notifications</Text>
-            <View style={styles.checkbox}>
-              <Text>Promotions</Text>
-              <CheckBox
-                value={emailNotifications.promo}
-                onValueChange={(newValue) =>
-                  setEmailNotifications((prevState) => ({
-                    ...prevState,
-                    promo: newValue,
-                  }))
-                }
-              />
-            </View>
-            <View style={styles.checkbox}>
-              <Text>Updates</Text>
-              <CheckBox
-                value={emailNotifications.updates}
-                onValueChange={(newValue) =>
-                  setEmailNotifications((prevState) => ({
-                    ...prevState,
-                    updates: newValue,
-                  }))
-                }
-              />
-            </View>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+          <View style={styles.headerContainer}>
+            <Text style={styles.headerText}>Profile</Text>
+            <Button title="Back" disabled />
           </View>
-          <TouchableOpacity
-            style={styles.buttonSave}
-            onPress={validateAndSaveProfileData}
-          >
-            <Text>Save Changes</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.buttonLogout} onPress={logOut}>
-            <Text style={styles.buttonText}>Log Out</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+          <View style={styles.avatarContainer}>
+            <TouchableOpacity onPress={pickImage}>
+              {avatar ? (
+                <Image source={{ uri: avatar }} style={styles.avatar} />
+              ) : (
+                <View style={styles.placeholderAvatar}>
+                  <Text style={styles.avatarInitials}>
+                    {firstName.charAt(0)}
+                    {lastName.charAt(0)}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+          <View style={styles.formContainer}>
+            <Text>First Name</Text>
+            <TextInput
+              style={styles.input}
+              value={firstName}
+              onChangeText={setFirstName}
+            />
+            <Text>Last Name</Text>
+            <TextInput
+              style={styles.input}
+              value={lastName}
+              onChangeText={setLastName}
+            />
+            <Text>Email</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+            />
+            <Text>Phone Number</Text>
+            <MaskedTextInput
+              style={styles.input}
+              mask="(999) 999-9999"
+              keyboardType="numeric"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+            />
+            <View style={styles.checkboxContainer}>
+              <Text>Email Notifications</Text>
+              <View style={styles.checkbox}>
+                <Text>Promotions</Text>
+                <CheckBox
+                  value={emailNotifications.promo}
+                  onValueChange={(newValue) =>
+                    setEmailNotifications((prevState) => ({
+                      ...prevState,
+                      promo: newValue,
+                    }))
+                  }
+                />
+              </View>
+              <View style={styles.checkbox}>
+                <Text>Updates</Text>
+                <CheckBox
+                  value={emailNotifications.updates}
+                  onValueChange={(newValue) =>
+                    setEmailNotifications((prevState) => ({
+                      ...prevState,
+                      updates: newValue,
+                    }))
+                  }
+                />
+              </View>
+            </View>
+            <TouchableOpacity
+              style={styles.buttonSave}
+              onPress={validateAndSaveProfileData}
+            >
+              <Text>Save Changes</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.buttonLogout} onPress={logOut}>
+              <Text style={styles.buttonText}>Log Out</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </TouchableWithoutFeedback>
   );
 }
@@ -219,14 +227,18 @@ export default function Profile({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
     backgroundColor: "white",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingHorizontal: 20,
   },
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 10,
   },
   headerText: {
     fontSize: 24,
@@ -234,7 +246,7 @@ const styles = StyleSheet.create({
   },
   avatarContainer: {
     alignItems: "center",
-    marginVertical: 20,
+    marginVertical: 10,
   },
   avatar: {
     width: 100,
@@ -266,7 +278,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#495E57",
   },
   checkboxContainer: {
-    marginVertical: 20,
+    marginVertical: 10,
   },
   checkbox: {
     flexDirection: "row",

@@ -8,9 +8,9 @@ import { NavigationContainer } from "@react-navigation/native";
 
 import Onboarding from "./screens/Onboarding";
 import Profile from "./screens/Profile";
-import Another from "./screens/Another";
+
 import Home from "./screens/Home";
-import HeaderLeft from "./components/HeaderLeft";
+
 import HeaderCenter from "./components/HeaderCenter";
 import { AuthProvider, useAuth } from "./components/AuthContext";
 
@@ -112,13 +112,13 @@ const Navigation = () => {
                 },
               }}
             />
-            <Stack.Screen name="Another" component={Another} />
           </>
         ) : (
           <Stack.Screen
             name="Onboarding"
             component={Onboarding}
             options={{
+              headerTitle: "WELCOME!",
               headerTitleAlign: "center",
               //headerLeft: () => <HeaderLeft />,
             }}

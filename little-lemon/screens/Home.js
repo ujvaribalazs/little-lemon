@@ -321,21 +321,21 @@ const styles = StyleSheet.create({
     paddingRight: 10,
   },
   headerTitle: {
-    fontSize: 40,
+    fontSize: 30,
     color: "#F4CE14",
     fontWeight: "bold",
   },
   headerLocation: {
-    fontSize: 30,
+    fontSize: 26,
     color: "#ffffff",
   },
   headerText: {
-    fontSize: 18,
+    fontSize: 14,
     color: "#ffffff",
   },
   headerImage: {
-    width: 100,
-    height: 100,
+    width: 120,
+    height: 120,
     borderRadius: 8,
   },
   loadingContainer: {
