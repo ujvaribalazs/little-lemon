@@ -7,8 +7,6 @@ import {
   TextInput,
   Image,
   Pressable,
-  KeyboardAvoidingView,
-  Platform,
   Keyboard,
   TouchableWithoutFeedback,
   ScrollView,

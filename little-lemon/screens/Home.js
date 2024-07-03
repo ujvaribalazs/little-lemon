@@ -1,4 +1,3 @@
-// Home.js
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -69,10 +68,10 @@ const Home = () => {
           "INSERT INTO menu (name, price, description, image, category) VALUES (?, ?, ?, ?, ?)",
           [item.name, item.price, item.description, item.image, item.category],
           (_, result) => {
-            console.log(`Stored item: ${item.name}`);
+            //console.log(`Stored item: ${item.name}`);
           },
           (_, error) => {
-            console.error("Error storing data in SQLite:", error);
+            //console.error("Error storing data in SQLite:", error);
             return false;
           }
         );
@@ -105,23 +104,23 @@ const Home = () => {
         params.push(`%${debouncedSearchText.trim()}%`);
       }
 
-      console.log("Constructed SQL Query:", query);
-      console.log("With Parameters:", params);
+      //console.log("Constructed SQL Query:", query);
+      //console.log("With Parameters:", params);
 
       tx.executeSql(
         query,
         params,
         (_, { rows: { _array } }) => {
           if (_array.length > 0) {
-            console.log("Loaded Menu Items from SQLite:", _array);
+            //console.log("Loaded Menu Items from SQLite:", _array);
           } else {
-            console.log("No menu items found in SQLite.");
+            //console.log("No menu items found in SQLite.");
           }
           setMenuItems(_array.length ? _array : []);
           setLoading(false);
         },
         (_, error) => {
-          console.error("Error loading data from SQLite:", error);
+          //console.error("Error loading data from SQLite:", error);
           return false;
         }
       );
@@ -138,11 +137,11 @@ const Home = () => {
         "SELECT * FROM menu",
         [],
         (_, { rows: { _array } }) => {
-          console.log("Current Menu Items in SQLite:");
-          console.log(_array);
+          //console.log("Current Menu Items in SQLite:");
+          //console.log(_array);
         },
         (_, error) => {
-          console.error("Error checking database content:", error);
+          //console.error("Error checking database content:", error);
           return false;
         }
       );
