@@ -120,7 +120,7 @@ const Navigation = () => {
             component={Onboarding}
             options={{
               headerTitleAlign: "center",
-              headerLeft: () => <HeaderLeft />,
+              //headerLeft: () => <HeaderLeft />,
             }}
           />
         )}

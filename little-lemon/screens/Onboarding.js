@@ -16,6 +16,7 @@ import {
 import { useAuth } from "../components/AuthContext";
 import { useFocusEffect } from "@react-navigation/native";
 import logo from "../assets/LLlogo.png";
+import logoGrey from "../assets/little-lemon-logo-grey.png";
 
 export default function Onboarding({ navigation }) {
   const [isFirstNameValid, setIsFirstNameValid] = useState(false);
@@ -71,12 +72,13 @@ export default function Onboarding({ navigation }) {
           behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
           <Text style={styles.welcomeTitle}>Let us get to know You</Text>
+          <Image source={logoGrey} style={styles.logoGrey} />
         </KeyboardAvoidingView>
         <View style={{ backgroundColor: "#CBD2D9" }}>
           <Text style={styles.title}>First Name</Text>
           <TextInput
             style={styles.input}
-            placeholder="Your first name"
+            placeholder=" type your first name"
             value={firstName}
             onChangeText={validateFirstName}
             maxLength={250}
@@ -84,7 +86,7 @@ export default function Onboarding({ navigation }) {
           <Text style={styles.title}>Email</Text>
           <TextInput
             style={styles.input}
-            placeholder="hello@email.com"
+            placeholder=" type your email"
             value={email}
             onChangeText={validateEmail}
             keyboardType="email-address"
@@ -143,11 +145,17 @@ const styles = StyleSheet.create({
     height: 50,
     resizeMode: "contain",
   },
+  logoGrey: {
+    width: 150,
+    height: 150,
+    resizeMode: "contain",
+    alignSelf: "center",
+  },
   welcomeTitle: {
     paddingVertical: 40,
     textAlign: "center",
     paddingTop: 60,
-    paddingBottom: 80,
+    paddingBottom: 40,
     fontSize: 36,
     color: "#344854",
   },
@@ -158,11 +166,14 @@ const styles = StyleSheet.create({
     color: "#344854",
   },
   input: {
+    fontSize: 20,
     padding: 10,
-    margin: 20,
+    marginVertical: 20,
+    marginHorizontal: 40,
     borderWidth: 2,
     borderRadius: 10,
     borderColor: "#344854",
+    backgroundColor: "#A7B7AB",
   },
   buttonContainer: {
     alignItems: "center",
@@ -176,10 +187,12 @@ const styles = StyleSheet.create({
     borderColor: "#CBD2D9",
     backgroundColor: "#495E57",
     borderRadius: 10,
-    width: 200,
+    width: 150,
   },
   disableButtonText: {
-    color: "gray",
+    color: "#495E57",
+    borderWidth: 1,
     backgroundColor: "#F4CE14",
+    borderColor: "#495E57",
   },
 });

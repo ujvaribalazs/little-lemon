@@ -27,6 +27,7 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const navigation = useNavigation();
   const [db, setDb] = useState(null);
 
@@ -94,10 +95,14 @@ const Home = () => {
         params.push(...selectedCategories);
       }
 
-      if (searchText.trim()) {
-        query += selectedCategories.length > 0 ? ` AND` : ` WHERE`;
+      if (debouncedSearchText.trim()) {
+        if (params.length > 0) {
+          query += ` AND`;
+        } else {
+          query += ` WHERE`;
+        }
         query += ` name LIKE ?`;
-        params.push(`%${searchText.trim()}%`);
+        params.push(`%${debouncedSearchText.trim()}%`);
       }
 
       console.log("Constructed SQL Query:", query);
@@ -133,7 +138,8 @@ const Home = () => {
         "SELECT * FROM menu",
         [],
         (_, { rows: { _array } }) => {
-          console.log("Current Menu Items in SQLite:", _array);
+          console.log("Current Menu Items in SQLite:");
+          console.log(_array);
         },
         (_, error) => {
           console.error("Error checking database content:", error);
@@ -169,7 +175,7 @@ const Home = () => {
               } else {
                 loadMenuFromSQLite(db);
               }
-              checkDatabaseContent(db);
+              checkDatabaseContent(db); // Check database content after initialization
             }
           );
         });
@@ -186,7 +192,19 @@ const Home = () => {
     if (db) {
       loadMenuFromSQLite(db);
     }
-  }, [selectedCategories, searchText]);
+  }, [selectedCategories, debouncedSearchText]);
+
+  // Debounce the search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchText(searchText);
+    }, 500);
+
+    // Cleanup function to cancel the timeout if searchText changes before the timeout completes
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchText]);
 
   const renderItem = ({ item }) => <MenuItem item={item} />;
 
